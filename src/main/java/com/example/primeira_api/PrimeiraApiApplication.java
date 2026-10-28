@@ -1,14 +1,12 @@
 package com.example.primeira_api;
 
-import com.example.primeira_api.model.Categoria;
-import com.example.primeira_api.model.Produto;
-import com.example.primeira_api.repository.CategoriaRepository;
-import com.example.primeira_api.repository.ProdutoRepository;
+import com.example.primeira_api.domain.model.Categoria;
+import com.example.primeira_api.domain.model.Produto;
+import com.example.primeira_api.domain.ports.outbound.SalvarProdutoPort;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import java.util.List;
 
 @SpringBootApplication
 public class PrimeiraApiApplication {
@@ -18,30 +16,26 @@ public class PrimeiraApiApplication {
     }
 
     @Bean
-    public CommandLineRunner testarJPA(ProdutoRepository produtoRepository, CategoriaRepository categoriaRepository) {
+    public CommandLineRunner testarHexagonalComRelacionamento(SalvarProdutoPort salvarProdutoPort) {
         return args -> {
-            System.out.println("\n--- ENTRANDO NO CODIGO DE TESTE DO JPA (COM RELACIONAMENTO) ---");
+            System.out.println("\n--- TESTE ARQUITETURA HEXAGONAL COM RELACIONAMENTO ---");
 
-            // 1. Criar e salvar as Categorias primeiro (O JPA precisa que o pai exista no banco)
-            Categoria eletronicos = categoriaRepository.save(new Categoria("Eletrônicos"));
-            Categoria informatica = categoriaRepository.save(new Categoria("Informática"));
+            // 1. Criar e salvar a Categoria usando objetos puros do domínio
+            Categoria informatica = new Categoria("Informática");
+            Categoria categoriaSalva = salvarProdutoPort.salvarCategoria(informatica);
 
-            // 2. Criar e salvar os Produtos já vinculados às suas Categorias
-            produtoRepository.save(new Produto("Notebook", 3500.0, informatica));
-            produtoRepository.save(new Produto("Mouse Gamer", 150.0, informatica));
-            produtoRepository.save(new Produto("Teclado Mecânico", 250.0, informatica));
-            produtoRepository.save(new Produto("Monitor 4K", 2100.0, eletronicos));
+            // 2. Criar e salvar o Produto vinculado à Categoria salva
+            Produto notebook = new Produto(null, "Notebook Gamer Hexagonal", 5500.0, categoriaSalva);
+            Produto produtoSalvo = salvarProdutoPort.salvar(notebook);
 
-            // 3. Buscar todos os produtos e mostrar a categoria de cada um
-            System.out.println("\n> Listando todos os produtos e suas respectivas categorias:");
-            List<Produto> todos = produtoRepository.findAll();
-            todos.forEach(p -> System.out.println(
-                "Produto: " + p.getNome() + 
-                " | Preço: R$ " + p.getPreco() + 
-                " | Categoria: " + p.getCategoria().getNome()
-            ));
+            // 3. Mostrar os dados na tela provando o desacoplamento e sucesso
+            System.out.println("\n> Sucesso! Dados salvos e recuperados via Portas do Domínio:");
+            System.out.println("ID Produto: " + produtoSalvo.getId() + 
+                               " | Nome: " + produtoSalvo.getNome() + 
+                               " | Preço: R$ " + produtoSalvo.getPreco() + 
+                               " | Categoria: " + produtoSalvo.getCategoria().getNome());
 
-            System.out.println("\n--- FIM DO TESTE DO JPA ---");
+            System.out.println("\n--- FIM DO TESTE HEXAGONAL ---");
         };
     }
 }

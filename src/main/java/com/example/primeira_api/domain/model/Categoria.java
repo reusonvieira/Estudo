@@ -1,23 +1,17 @@
-package com.example.primeira_api.model;
+package com.example.primeira_api.domain.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
 public class Categoria {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
     private String nome;
 
-    // Construtor padrão (obrigatório para o JPA)
-    public Categoria() {}
-
+    // Construtor para criar uma nova categoria
     public Categoria(String nome) {
+        this.nome = nome;
+    }
+
+    // Construtor completo (usado quando o banco devolve o ID)
+    public Categoria(Long id, String nome) {
+        this.id = id;
         this.nome = nome;
     }
 
