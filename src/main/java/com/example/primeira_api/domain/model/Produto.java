@@ -1,20 +1,22 @@
 package com.example.primeira_api.domain.model;
 
 public class Produto {
-    private Long id;
+    private String id; // Alterado de Long para String
     private String nome;
     private Double preco;
     private Categoria categoria;
 
-    public Produto(Long id, String nome, Double preco, Categoria categoria) {
+    // Construtor completo atualizado para String
+    public Produto(String id, String nome, Double preco, Categoria categoria) {
         this.id = id;
         this.nome = nome;
         this.preco = preco;
         this.categoria = categoria;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // Getters e Setters atualizados
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public Double getPreco() { return preco; }

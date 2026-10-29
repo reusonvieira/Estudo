@@ -10,29 +10,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProdutoDatabaseAdapter implements SalvarProdutoPort {
 
-    private final ProdutoJpaRepository jpaRepository;
-    private final CategoriaJpaRepository categoriaJpaRepository;
+    // Injetando as novas interfaces do MongoDB que você criou
+    private final SpringDataProdutoRepository produtoRepository;
+    private final CategoriaMongoRepository categoriaRepository;
 
-    public ProdutoDatabaseAdapter(ProdutoJpaRepository jpaRepository, CategoriaJpaRepository categoriaJpaRepository) {
-        this.jpaRepository = jpaRepository;
-        this.categoriaJpaRepository = categoriaJpaRepository;
+    public ProdutoDatabaseAdapter(SpringDataProdutoRepository produtoRepository, CategoriaMongoRepository categoriaRepository) {
+        this.produtoRepository = produtoRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
     @Override
     public Categoria salvarCategoria(Categoria categoria) {
-        CategoriaEntity entity = new CategoriaEntity(categoria.getNome());
-        CategoriaEntity entitySalva = categoriaJpaRepository.save(entity);
+        // Passamos o ID (que pode vir nulo se for uma nova categoria, e o Mongo gera automaticamente)
+        CategoriaEntity entity = new CategoriaEntity(categoria.getId(), categoria.getNome());
+        CategoriaEntity entitySalva = categoriaRepository.save(entity);
         return new Categoria(entitySalva.getId(), entitySalva.getNome());
     }
 
     @Override
     public Produto salvar(Produto produto) {
-        CategoriaEntity catEntity = new CategoriaEntity(produto.getCategoria().getId(), produto.getCategoria().getNome());
-        ProdutoEntity entity = new ProdutoEntity(produto.getNome(), produto.getPreco(), catEntity);
+        CategoriaEntity catEntity = null;
+        if (produto.getCategoria() != null) {
+            catEntity = new CategoriaEntity(produto.getCategoria().getId(), produto.getCategoria().getNome());
+        }
+
+        // Passamos o ID do produto, nome, preço e a categoria tratada acima
+        ProdutoEntity entity = new ProdutoEntity(produto.getId(), produto.getNome(), produto.getPreco(), catEntity);
         
-        ProdutoEntity entitySalva = jpaRepository.save(entity);
+        ProdutoEntity entitySalva = produtoRepository.save(entity);
         
-        Categoria categoriaDoDominio = new Categoria(entitySalva.getCategoria().getId(), entitySalva.getCategoria().getNome());
+        Categoria categoriaDoDominio = null;
+        if (entitySalva.getCategoria() != null) {
+            categoriaDoDominio = new Categoria(entitySalva.getCategoria().getId(), entitySalva.getCategoria().getNome());
+        }
+
         return new Produto(entitySalva.getId(), entitySalva.getNome(), entitySalva.getPreco(), categoriaDoDominio);
     }
 }

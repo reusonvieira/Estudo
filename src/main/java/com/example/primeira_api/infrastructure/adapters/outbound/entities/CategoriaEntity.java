@@ -1,29 +1,29 @@
 package com.example.primeira_api.infrastructure.adapters.outbound.entities;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "categorias")
+@Document(collection = "categorias") // Define a coleção no MongoDB
 public class CategoriaEntity {
-    
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id; // Alterado de Long para String
     private String nome;
 
-    public CategoriaEntity() {}
-
-    public CategoriaEntity(String nome) {
-        this.nome = nome;
+    // Construtor padrão (Obrigatório para o Spring Data)
+    public CategoriaEntity() {
     }
 
-    public CategoriaEntity(Long id, String nome) {
+    // Construtor completo
+    public CategoriaEntity(String id, String nome) {
         this.id = id;
         this.nome = nome;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // Getters e Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 }
